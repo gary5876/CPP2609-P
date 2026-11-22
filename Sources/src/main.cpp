@@ -4,6 +4,7 @@
 //   hanseek extract <파일>
 //   hanseek stats [--db 파일]
 #include <cstdio>
+#include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #include <string>
@@ -72,15 +73,18 @@ bool parseOptions(const std::vector<std::string>& argv, Options& opt) {
 }
 
 // 터미널이면 색으로 강조하고, 파일로 보낼 때는 [ ]로 강조한다.
+// 환경 변수 HANSEEK_COLOR=always면 파이프로 보낼 때도 색을 쓴다.
 bool useColor() {
+    const char* env = std::getenv("HANSEEK_COLOR");
+    bool forced = env != nullptr && std::string(env) == "always";
 #ifdef _WIN32
-    if (!_isatty(_fileno(stdout))) return false;
+    if (!forced && !_isatty(_fileno(stdout))) return false;
     HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD mode = 0;
     if (!GetConsoleMode(h, &mode)) return false;
-    return SetConsoleMode(h, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING) != 0;
+    return SetConsoleMode(h, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING) != 0 || forced;
 #else
-    return isatty(fileno(stdout)) != 0;
+    return forced || isatty(fileno(stdout)) != 0;
 #endif
 }
 
@@ -97,7 +101,7 @@ int cmdIndex(const Options& opt) {
     index.save(utf8ToPath(opt.db));
     std::cout << "색인 완료: 문서 " << report.indexed << "개 / 대상 " << report.scanned << "개, 문단 "
               << index.paragraphCount() << "개, 토큰 " << index.tokenCount() << "종류, " << std::fixed
-              << std::setprecision(2) << report.seconds << "초\n";
+              << std::setprecision(1) << report.seconds * 1000 << " ms\n";
     std::cout << "색인 파일: " << opt.db << "\n";
     if (!report.failures.empty()) {
         std::cout << "읽지 못한 문서 " << report.failures.size() << "개:\n";
