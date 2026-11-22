@@ -11,7 +11,7 @@
 
 ### Windows (Visual Studio 2019 이상)
 
-"x64 Native Tools Command Prompt"에서:
+CMake 설정은 만들어 두었지만 Windows PC에서 빌드는 아직 확인하지 못했습니다. "x64 Native Tools Command Prompt"에서:
 
 ```
 cd Sources
