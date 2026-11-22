@@ -1,0 +1,6 @@
+.DS_Store
+templates/
+Sources/build/
+Sources/bin/
+*.o
+*.idx
